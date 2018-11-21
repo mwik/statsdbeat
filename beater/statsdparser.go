@@ -38,6 +38,10 @@ func parseBeat(msg string) ([]beat.Event, error) {
 		return nil, err
 	}
 
+	if len(parts) >= 3 {
+		tags = parseDDTags(strings.TrimLeft(parts[2],"#"))
+	}
+
 	_type := strings.TrimSpace(parts[1])
 	e := &beat.Event{
 		Timestamp: time.Now(),
@@ -119,6 +123,19 @@ func getBucketTagsValue(part string) (bucket string, tags map[string]interface{}
 	val, err = strconv.Atoi(parts[1])
 
 	return bucket, tags, val, err
+}
+
+func parseDDTags(line string) (tags map[string]interface{}) {
+	subParts := strings.Split(line, ",")
+	tags = make(map[string]interface{}, len(subParts))
+	for i := 0; i < len(subParts); i++ {
+		kv := strings.Split(subParts[i], ":")
+		if len(kv) == 2 {
+			tags[kv[0]] = kv[1]
+		}
+	}
+
+	return tags
 }
 
 //accounts.authentication.password.failure.no_email_found
